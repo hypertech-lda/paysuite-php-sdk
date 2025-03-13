@@ -1,92 +1,59 @@
 <?php
 
 namespace Hypertech\Paysuite\Message;
+
 class Response
 {
-    public string $status;
-    private ?string $transaction_id = null;
-    private ?string $trx_ref = null;
-    private string $checkout_url;
-    private float $amount;
-    private string $message;
-    private array  $content;
+    private string $status;
+    private array $data;
+    private ?string $message;
+    private array $content;
 
-    public function __construct($content)
+    public function __construct(string $content)
     {
         $this->content = json_decode($content, true);
         $this->initialize();
     }
 
     /**
-     * @return string|null
+     * Initialize response properties from API response
      */
-    public function getTransactionId(): ?string
+    private function initialize(): void
     {
-        return $this->transaction_id;
+        $this->status = $this->content['status'] ?? '';
+        $this->data = $this->content['data'] ?? [];
+        $this->message = $this->content['message'] ?? null;
     }
 
     /**
-     * @return string|null
+     * Check if the request was successful
      */
-    public function getTrxRef(): ?string
+    public function isSuccessfully(): bool
     {
-        return $this->trx_ref;
+        return $this->status === 'success';
     }
 
     /**
-     * @return string|null
+     * Get the response data
      */
-    public function getCheckoutUrl(): ?string
+    public function getData(): array
     {
-        return $this->checkout_url;
+        return $this->data;
     }
 
     /**
-     * @return float
+     * Get error message if present
      */
-    public function getAmount(): float
+    public function getMessage(): ?string
     {
-        return $this->amount;
+        return $this->message;
     }
 
     /**
-     * @return array
+     * Get the raw response content
      */
     public function getContent(): array
     {
         return $this->content;
     }
-
-    public function initialize(){
-
-        foreach ($this->getproperties() as $property){
-            if (isset($this->content[$property])){
-                $this->{$property} = $this->content[$property];
-            }
-        }
-
-
-    }
-
-    private function getProperties():array{
-
-        return array(
-            'status',
-            'checkout_url',
-            'message',
-        );
-    }
-
-    public function isSuccessfully(): bool
-    {
-        return ($this->status == 'success');
-    }
-
-    public function getMessage(): string
-    {
-        return $this->message;
-    }
-
-
-
 }

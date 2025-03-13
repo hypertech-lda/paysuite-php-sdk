@@ -1,61 +1,111 @@
-## Como utilizar a biblioteca para criar um checkout
+## How to Use the PaySuite PHP SDK
 
-A biblioteca `paysuite-php-sdk` permite que você crie checkouts de forma fácil e rápida. Para criar um checkout, e receber pagamentos suando métodos de pagamento disponíveis em Moçambique como Mpesa, eMola, PayPal e transferência bancária.
-Para usar siga os seguintes passos:
+The `paysuite-php-sdk` library allows you to process payments quickly and easily using payment methods available in Mozambique, such as Mpesa, eMola, PayPal, and bank transfers.
 
-1. Crie uma conta no [Paysuite.co.mz](https://paysuite.co.mz) e obtenha a chave secreta no seu dashboard
+[🇵🇹 Documentação em Português](docs/README.pt.md)
 
-2. Instale a biblioteca `paysuite-php-sdk`:
+### Installation
 
-    ```bash
-    composer require hypertech/paysuite-php-sdk
-    ```
+1. Create an account at [Paysuite.tech](https://paysuite.tech) and obtain your access token from the dashboard
 
-3. Crie uma instância da classe `Client` com seu Secret key e chame o método `checkout()` da classe `Client` :
+2. Install the library using Composer:
+
+```bash
+composer require hypertech/paysuite-php-sdk
+```
+
+### Basic Usage
+
+First, import and initialize the client with your token:
 
 ```php
 use Hypertech\Paysuite\Client;
+use Hypertech\Paysuite\Exception\ValidationException;
+use Hypertech\Paysuite\Exception\PaysuiteException;
 
-$secret = "SuaChaveSecreta"
-$paysuite = new Client($secret);
+$token = "your-access-token";
+$client = new Client($token);
+```
 
-$result = $paysuite->checkout([
-    "tx_ref" => 'FACT123',
-    "currency" => "MZN",
-    "purpose"=> "Pagamento de factura",
-    "amount" => 100,
-    "callback_url" => "http://seusite.com/callback_url",
-    "redirect_url" => "http://seusite.com/invoice.php"
-]);
+#### Create a Payment Request
 
-if ($result->isSuccessfully()) {
-    $checkoutUrl = $result->getCheckoutUrl();
-} else {
-    echo $result->getMessage();
+```php
+try {
+    $response = $client->createPaymentRequest([
+        'amount' => '100.50',
+        'reference' => 'INV123',
+        'description' => 'Invoice payment',
+        'return_url' => 'https://yoursite.com/return'
+    ]);
+
+    if ($response->isSuccessfully()) {
+        $data = $response->getData();
+        $checkoutUrl = $data['checkout_url'];
+        $paymentId = $data['id'];
+        
+        // Redirect customer to payment page
+        header("Location: " . $checkoutUrl);
+        exit;
+    }
+} catch (ValidationException $e) {
+    // Handle validation errors
+    echo "Validation error: " . $e->getMessage();
+} catch (PaysuiteException $e) {
+    // Handle API errors
+    echo "API error: " . $e->getMessage();
 }
 ```
 
+#### Check Payment Status
 
-### Testes
+```php
+try {
+    $response = $client->getPaymentRequest($paymentId);
+    
+    if ($response->isSuccessfully()) {
+        $data = $response->getData();
+        $status = $data['status'];
+        
+        if (isset($data['transaction'])) {
+            $transactionId = $data['transaction']['transaction_id'];
+            $paidAt = $data['transaction']['paid_at'];
+        }
+    }
+} catch (ValidationException $e) {
+    echo "Validation error: " . $e->getMessage();
+} catch (PaysuiteException $e) {
+    echo "API error: " . $e->getMessage();
+}
+```
 
-``` bash
-export SECRET_KEY="ASuaChaveSecreta"
+### Error Handling
+
+The SDK includes two main types of exceptions:
+
+- `ValidationException`: For validation errors (invalid or missing data)
+- `PaysuiteException`: For API errors (authentication, server, etc.)
+
+### Running Tests
+
+Configure your test token in the `phpunit.xml` file or via environment variable:
+
+```bash
+export TOKEN="your-test-token"
 composer test
 ```
 
 ### Changelog
 
-Por-favor veja [CHANGELOG](CHANGELOG.md) para mais detalhes.
+Please see [CHANGELOG](CHANGELOG.md) for more details.
 
-## Contribua
+## Contributing
 
-Por-favor veja [CONTRIBUTING](CONTRIBUTING.md) para mais detalhes.
+Please see [CONTRIBUTING](CONTRIBUTING.md) for more details.
 
-### Segurança
+### Security
 
-Se você descobrir algum problema relacionado à segurança, envie um e-mail para security@hypertech.co.mz em vez de usar o rastreador de problemas.
+If you discover any security-related issues, please email security@hypertech.co.mz instead of using the issue tracker.
 
+## License
 
-## Licença
-
-The MIT License (MIT). Por-favor veja [License File](LICENSE.md) para mais informações.
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

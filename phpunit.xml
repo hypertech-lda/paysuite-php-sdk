@@ -12,7 +12,7 @@
 
     <php>
         <ini name="error_reporting" value="E_ALL" />
-        <env name="SECRET_KEY" value="REPLACE"/>
+        <env name="TOKEN" value="1|wY8p455gtkV9xJ4nQDt4WuzRXMuFTcMyhA1CdzTr7b16ef52"/>
     </php>
 
 </phpunit>
