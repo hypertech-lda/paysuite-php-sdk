@@ -12,7 +12,7 @@
 
     <php>
         <ini name="error_reporting" value="E_ALL" />
-        <env name="TOKEN" value="1|wY8p455gtkV9xJ4nQDt4WuzRXMuFTcMyhA1CdzTr7b16ef52"/>
+        <env name="TOKEN" value="5|vJuvWAqU3sA7O7IauhkGMY3RpCNRnS6VKOoVcURd484ed98f"/>
     </php>
 
 </phpunit>

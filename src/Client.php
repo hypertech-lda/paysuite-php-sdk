@@ -52,10 +52,10 @@ class Client
      * @throws ValidationException if required fields are missing or invalid
      * @throws PaysuiteException if API request fails
      */
-    public function createPaymentRequest(array $data): Response
+    public function createPayment(array $data): Response
     {
         $this->validatePaymentRequestData($data);
-        $result = $this->request('POST', 'payment-requests', $data);
+        $result = $this->request('POST', 'payments', $data);
         return new Response($result);
     }
 
@@ -67,12 +67,12 @@ class Client
      * @throws ValidationException if UUID is invalid
      * @throws PaysuiteException if API request fails
      */
-    public function getPaymentRequest(string $uuid): Response
+    public function getPayment(string $uuid): Response
     {
         if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $uuid)) {
             throw new ValidationException('Invalid UUID format');
         }
-        $result = $this->request('GET', "payment-requests/{$uuid}");
+        $result = $this->request('GET', "payments/{$uuid}");
         return new Response($result);
     }
 
