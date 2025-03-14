@@ -128,6 +128,21 @@ class ClientTest extends TestCase
         ]);
     }
 
+    public function testCreatePaymentSuccess(): void
+    {
+        
+        $response = $this->client->createPayment([
+            'amount' => '100',
+            'reference' => 'TEST123',
+            'description' => 'Test Payment',
+            'return_url' => 'https://example.com/return'
+        ]);
+
+        $this->assertTrue($response->isSuccessfully());
+        $this->assertNotEmpty($response->getCheckoutUrl());
+        $this->assertNotEmpty($response->getData()['id']);
+    }
+
     public function testCreatePaymentNonEmptyZeroAmount(): void
     {
         $this->expectException(ValidationException::class);
