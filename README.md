@@ -2,8 +2,6 @@
 
 The `paysuite-php-sdk` library allows you to process payments quickly and easily using payment methods available in Mozambique, such as Mpesa, eMola, PayPal, and bank transfers.
 
-[🇵🇹 Documentação em Português](docs/README.pt.md)
-
 ### Installation
 
 1. Create an account at [Paysuite.tech](https://paysuite.tech) and obtain your access token from the dashboard
@@ -44,7 +42,7 @@ try {
         $checkoutUrl = $response->getCheckoutUrl();
         
         // Get the payment ID for later reference
-        $paymentId = $response->getData()['id'];
+        $paymentId = $response->getId();
         
         // Redirect customer to payment page
         header("Location: " . $checkoutUrl);
@@ -71,7 +69,7 @@ try {
         // Check if transaction data is available
         if (isset($response->getData()['transaction'])) {
             $transaction = $response->getData()['transaction'];
-            $transactionId = $transaction['transaction_id'];
+            $transactionId = $transaction['id'];
             $paidAt = $transaction['paid_at'];
         }
     }
@@ -89,8 +87,9 @@ The SDK implements comprehensive validation for all API requests:
 1. **Payment Request Validation**:
    - `amount`: Must be a positive number
    - `reference`: Required string
-   - `description`: Required string
+   - `description`: Optional string
    - `return_url`: Must be a valid URL
+   - `callback_url`: Must be a valid URL
 
 2. **UUID Validation**:
    - Payment IDs must follow the standard UUID format (8-4-4-4-12 hexadecimal characters)
