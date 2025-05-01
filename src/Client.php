@@ -84,8 +84,8 @@ class Client
      */
     private function validatePaymentRequestData(array $data): void
     {
-        $requiredFields = ['amount', 'reference', 'description', 'return_url'];
-        
+        $requiredFields = ['amount', 'reference'];
+
         foreach ($requiredFields as $field) {
             if (!isset($data[$field]) || empty($data[$field])) {
                 throw new ValidationException("Missing required field: {$field}");
@@ -96,8 +96,12 @@ class Client
             throw new ValidationException('Amount must be a positive number');
         }
 
-        if (!filter_var($data['return_url'], FILTER_VALIDATE_URL)) {
+        if (isset($data['return_url']) && !filter_var($data['return_url'], FILTER_VALIDATE_URL)) {
             throw new ValidationException('Invalid return URL');
+        }
+
+        if (isset($data['callback_url']) && !filter_var($data['callback_url'], FILTER_VALIDATE_URL)) {
+            throw new ValidationException('Invalid callback URL');
         }
     }
 

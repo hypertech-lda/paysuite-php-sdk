@@ -2,14 +2,14 @@
 
 namespace Hypertech\Paysuite\Message;
 
-    /**
-     * Represents a response from the PaySuite API
-     *
-     * @property string $status Response status (success or error)
-     * @property array $data Response data (contains reference, checkout_url and amount)
-     * @property string|null $message Error message if request was not successful
-     * @property array $content Raw response content
-     */
+/**
+ * Represents a response from the PaySuite API
+ *
+ * @property string $status Response status (success or error)
+ * @property array $data Response data (contains reference, checkout_url and amount)
+ * @property string|null $message Error message if request was not successful
+ * @property array $content Raw response content
+ */
 /**
  * Represents a response from the PaySuite API
  *
@@ -85,6 +85,17 @@ class Response
     public function getContent(): array
     {
         return $this->content;
+    }
+
+
+    /**
+     * Get the payment ID
+     *
+     * @return string|null Payment ID, or null if not present
+     */
+    public function getId(): ?string
+    {
+        return $this->data['id'] ?? null;
     }
 
     /**

@@ -17,12 +17,12 @@ class ClientTest extends TestCase
     {
         parent::setUp();
         $this->token = $_ENV['TOKEN'] ?? '';
-        
+
         // Skip tests if no token is provided
         if (empty($this->token)) {
             $this->markTestSkipped('No token provided. Set TOKEN environment variable to run tests.');
         }
-        
+
         $this->client = new Client($this->token);
     }
 
@@ -58,7 +58,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Missing required field: amount');
-        
+
         $this->client->createPayment([
             'reference' => 'TEST123',
             'description' => 'Test Payment',
@@ -70,7 +70,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Missing required field: reference');
-        
+
         $this->client->createPayment([
             'amount' => '100',
             'description' => 'Test Payment',
@@ -78,35 +78,13 @@ class ClientTest extends TestCase
         ]);
     }
 
-    public function testCreatePaymentMissingDescription(): void
-    {
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Missing required field: description');
-        
-        $this->client->createPayment([
-            'amount' => '100',
-            'reference' => 'TEST123',
-            'return_url' => 'https://example.com/return'
-        ]);
-    }
 
-    public function testCreatePaymentMissingReturnUrl(): void
-    {
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Missing required field: return_url');
-        
-        $this->client->createPayment([
-            'amount' => '100',
-            'reference' => 'TEST123',
-            'description' => 'Test Payment'
-        ]);
-    }
 
     public function testCreatePaymentInvalidAmount(): void
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Amount must be a positive number');
-        
+
         $this->client->createPayment([
             'amount' => '-100',
             'reference' => 'TEST123',
@@ -119,7 +97,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Missing required field: amount');
-        
+
         $this->client->createPayment([
             'amount' => '0', // In PHP, empty('0') is true, so this will trigger the "Missing required field" validation
             'reference' => 'TEST123',
@@ -130,7 +108,7 @@ class ClientTest extends TestCase
 
     public function testCreatePaymentSuccess(): void
     {
-        
+
         $response = $this->client->createPayment([
             'amount' => '100',
             'reference' => 'TEST123',
@@ -147,7 +125,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Amount must be a positive number');
-        
+
         $this->client->createPayment([
             'amount' => '0.00', // This won't be caught by empty() but will fail the positive number check
             'reference' => 'TEST123',
@@ -160,7 +138,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Invalid return URL');
-        
+
         $this->client->createPayment([
             'amount' => '100',
             'reference' => 'TEST123',
@@ -173,7 +151,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Invalid UUID format');
-        
+
         $this->client->getPayment('invalid-uuid');
     }
 
@@ -181,7 +159,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Invalid UUID format');
-        
+
         $this->client->getPayment('');
     }
 
@@ -189,7 +167,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Invalid UUID format');
-        
+
         // UUID with incorrect format (missing a section)
         $this->client->getPayment('550e8400-e29b-41d4-a716');
     }
@@ -207,14 +185,14 @@ class ClientTest extends TestCase
                 'checkout_url' => 'https://paysuite.tech/checkout/550e8400-e29b-41d4-a716-446655440000'
             ]
         ];
-        
+
         $response = new Response(json_encode($responseData));
-        
+
         // Test basic response methods
         $this->assertTrue($response->isSuccessfully());
         $this->assertEquals($responseData, $response->getContent());
         $this->assertEquals($responseData['data'], $response->getData());
-        
+
         // Test helper methods
         $this->assertEquals('TEST1234', $response->getReference());
         $this->assertEquals(100.50, $response->getAmount());
@@ -228,9 +206,9 @@ class ClientTest extends TestCase
             'status' => 'error',
             'message' => 'Test error message'
         ];
-        
+
         $response = new Response(json_encode($responseData));
-        
+
         // Test error response methods
         $this->assertFalse($response->isSuccessfully());
         $this->assertEquals($responseData, $response->getContent());
@@ -247,9 +225,9 @@ class ClientTest extends TestCase
                 // Missing amount, reference, etc.
             ]
         ];
-        
+
         $response = new Response(json_encode($responseData));
-        
+
         // Test null returns for missing fields
         $this->assertNull($response->getReference());
         $this->assertNull($response->getAmount());
@@ -263,11 +241,27 @@ class ClientTest extends TestCase
     {
         $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $result = '';
-        
+
         for ($i = 0; $i < $length; $i++) {
             $result .= $chars[random_int(0, strlen($chars) - 1)];
         }
-        
+
         return $result;
+    }
+
+    /**
+     * test get payment Id
+     */
+
+    public function testGetPaymentId(): void
+    {
+        $response = $this->client->createPayment([
+            'amount' => '100',
+            'reference' => 'TEST123',
+            'description' => 'Test Payment',
+            'return_url' => 'https://example.com/return'
+        ]);
+
+        $this->assertNotEmpty($response->getId());
     }
 }
